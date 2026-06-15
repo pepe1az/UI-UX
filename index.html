@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TicketFlow Accessible Profile MVP</title>
+<style>
+:root{
+  --bg:#f6f7fb;--card:#fff;--text:#111827;--muted:#6b7280;--line:#d8dee9;
+  --accent:#6d28d9;--accent-dark:#4c1d95;--green:#166534;--red:#991b1b;--yellow:#92400e;
+  --focus:#f59e0b;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,sans-serif;line-height:1.5}
+.skip-link{position:absolute;left:12px;top:-70px;z-index:999;background:#fff;color:#111827;border:3px solid var(--focus);border-radius:12px;padding:10px 14px;font-weight:800}
+.skip-link:focus{top:12px}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+header{background:linear-gradient(135deg,#111827,#4c1d95,#7c3aed);color:white;padding:20px 22px 34px}
+.wrap{max-width:1150px;margin:auto}
+.topline{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:24px}
+.brand{font-weight:950;font-size:20px;letter-spacing:-.03em}
+.profile-zone{position:relative;min-width:260px;display:flex;justify-content:flex-end}
+.profile-button{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.26);color:white;display:flex;gap:10px;align-items:center}
+.avatar{width:34px;height:34px;border-radius:999px;background:white;color:var(--accent-dark);display:grid;place-items:center;font-weight:950;flex:0 0 auto}
+.profile-panel{position:absolute;right:0;top:54px;z-index:30;width:min(360px,calc(100vw - 44px));background:white;color:var(--text);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 25px 70px rgba(0,0,0,.22)}
+.profile-panel h2{font-size:20px}
+h1{margin:0 0 8px;font-size:46px;letter-spacing:-.06em;line-height:1.05}
+.subtitle{max-width:780px;color:rgba(255,255,255,.86);line-height:1.55;margin:0}
+main{max-width:1150px;margin:22px auto 60px;padding:0 22px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+button,input,select{font:inherit}
+button{border:0;border-radius:12px;background:var(--accent);color:white;padding:10px 13px;font-weight:750;cursor:pointer;min-height:44px;min-width:44px}
+button.secondary{background:#f3f4f6;color:#1f2937;border:1px solid var(--line)}
+button.danger{background:#fee2e2;color:var(--red);border:1px solid #fecaca}
+button.ghost{background:white;color:var(--accent);border:1px solid #ddd6fe}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible,select:focus-visible,.tab:focus-visible{outline:4px solid var(--focus);outline-offset:3px}
+.tab{background:white;color:#1f2937;border:1px solid var(--line)}
+.tab[aria-selected="true"]{background:var(--accent);color:white;border-color:var(--accent)}
+.hidden{display:none!important}
+.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;align-items:start}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.topline{align-items:stretch;flex-direction:column}.profile-zone{justify-content:flex-start}.profile-panel{left:0;right:auto}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 15px 45px rgba(17,24,39,.07)}
+h2{margin:0 0 12px;font-size:23px;letter-spacing:-.03em}
+h3{margin:18px 0 10px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.filters{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:10px;margin-bottom:14px}
+@media(max-width:700px){.filters{grid-template-columns:1fr}}
+input,select{width:100%;border:1px solid #9ca3af;border-radius:12px;padding:11px;background:white;color:var(--text);min-height:44px}
+label span{display:block;font-size:13px;font-weight:750;margin-bottom:5px;color:#374151}
+.events,.cart,.orders{display:grid;gap:12px}
+.event{border:1px solid var(--line);border-radius:16px;background:white;overflow:hidden;display:grid;grid-template-columns:130px 1fr}
+@media(max-width:650px){.event{grid-template-columns:1fr}}
+.poster{min-height:140px;color:white;display:grid;place-items:center;text-align:center;background:linear-gradient(135deg,#6d28d9,#111827);padding:14px}
+.poster b{font-size:31px}
+.body{padding:14px;display:grid;gap:8px}
+.title{font-size:19px;font-weight:900;margin:0}
+.row{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.pill{display:inline-flex;border-radius:999px;background:#f3f4f6;color:#1f2937;padding:5px 9px;font-size:12px;font-weight:800}
+.green{background:#dcfce7;color:var(--green)}.red{background:#fee2e2;color:var(--red)}.yellow{background:#fef3c7;color:var(--yellow)}.purple{background:#ede9fe;color:#4c1d95}
+.ticketType,.cartItem{border:1px solid var(--line);border-radius:14px;padding:11px;background:#fafafa;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;margin-top:7px}
+.qty{display:flex;gap:6px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+.qty b{min-width:24px;text-align:center}
+.summary{border-top:1px solid var(--line);margin-top:14px;padding-top:14px;display:grid;gap:8px}
+.summaryRow{display:flex;justify-content:space-between;gap:10px}
+.total{font-size:22px;font-weight:950}
+form{display:grid;gap:10px}
+.ticket{border:1px solid #ddd6fe;background:linear-gradient(135deg,#fff,#faf5ff);border-radius:18px;padding:16px;display:grid;gap:10px}
+.qr{width:115px;height:115px;border-radius:14px;border:1px solid #c4b5fd;background:linear-gradient(90deg,#111827 8px,transparent 8px) 0 0/18px 18px,linear-gradient(#111827 8px,transparent 8px) 0 0/18px 18px,#fff;display:grid;place-items:center;text-align:center;font-size:11px;font-weight:900}
+.ticketHead{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.scenario{border:1px solid var(--line);background:#f8fafc;border-radius:15px;padding:14px;margin-bottom:10px}
+.toast{position:fixed;right:22px;bottom:22px;background:#111827;color:white;border-radius:13px;padding:13px 16px;opacity:0;transform:translateY(10px);transition:.2s;max-width:360px}
+.toast.show{opacity:1;transform:translateY(0)}
+footer{max-width:1150px;margin:0 auto 40px;padding:0 22px;color:var(--muted);font-size:13px}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Перейти к основному содержимому</a>
+
+<header role="banner">
+  <div class="wrap">
+    <div class="topline">
+      <div class="brand">TicketFlow</div>
+      <div class="profile-zone">
+        <button id="profileBtn" class="profile-button" aria-expanded="false" aria-controls="profilePanel">
+          <span class="avatar" aria-hidden="true" id="avatar">Г</span>
+          <span id="profileBtnText">Гость · зарегистрироваться</span>
+        </button>
+
+        <section id="profilePanel" class="profile-panel hidden" aria-labelledby="profile-title">
+          <h2 id="profile-title">Профиль пользователя</h2>
+
+          <div id="guestProfile">
+            <p class="muted small">Зарегистрируйтесь по номеру телефона. В MVP SMS не отправляется, используется демонстрационный код <b>1111</b>.</p>
+            <form id="phoneForm">
+              <label for="regName"><span>Имя</span><input id="regName" autocomplete="name" required placeholder="Иван Петров"></label>
+              <label for="regPhone"><span>Номер телефона</span><input id="regPhone" autocomplete="tel" required inputmode="tel" placeholder="+7 999 123-45-67"></label>
+              <button type="submit">Получить код</button>
+            </form>
+
+            <form id="codeForm" class="hidden">
+              <label for="smsCode"><span>Код из SMS</span><input id="smsCode" inputmode="numeric" autocomplete="one-time-code" placeholder="1111"></label>
+              <button type="submit">Зарегистрироваться</button>
+              <button type="button" class="secondary" id="backToPhone">Изменить телефон</button>
+            </form>
+          </div>
+
+          <div id="userProfile" class="hidden">
+            <p><b id="profileName"></b></p>
+            <p class="muted small">Телефон: <span id="profilePhone"></span></p>
+            <p class="muted small">Статус: зарегистрированный покупатель</p>
+            <button class="secondary" id="fillBuyer">Подставить данные в заказ</button>
+            <button class="danger" id="logoutBtn">Выйти из профиля</button>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <h1>TicketFlow</h1>
+    <p class="subtitle">
+      Доступный MVP системы онлайн-покупки билетов: каталог мероприятий, выбор типа билета, корзина,
+      удаление билетов из корзины, отмена купленных билетов, запрос возврата средств, регистрация по телефону и электронный билет.
+    </p>
+  </div>
+</header>
+
+<main id="main-content" tabindex="-1">
+<nav class="tabs" aria-label="Разделы сайта">
+  <button class="tab" data-tab="app" role="tab" aria-selected="true" aria-controls="tab-app" id="tab-button-app">Прототип</button>
+  <button class="tab" data-tab="orders" role="tab" aria-selected="false" aria-controls="tab-orders" id="tab-button-orders">Мои билеты</button>
+  <button class="tab" data-tab="refunds" role="tab" aria-selected="false" aria-controls="tab-refunds" id="tab-button-refunds">Возвраты</button>
+  <button class="tab" data-tab="scenarios" role="tab" aria-selected="false" aria-controls="tab-scenarios" id="tab-button-scenarios">Сценарии</button>
+  <button class="tab" data-tab="about" role="tab" aria-selected="false" aria-controls="tab-about" id="tab-button-about">Описание</button>
+</nav>
+
+<div id="live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+<section id="tab-app" role="tabpanel" aria-labelledby="tab-button-app">
+<div class="grid">
+<section class="card" aria-labelledby="catalog-title">
+<h2 id="catalog-title">Каталог мероприятий</h2>
+<div class="filters" role="search" aria-label="Фильтры мероприятий">
+<label for="search"><span>Поиск мероприятия</span><input id="search" autocomplete="off" placeholder="Например: концерт или конференция"></label>
+<label for="cat"><span>Категория</span><select id="cat"><option value="all">Все категории</option><option>Концерт</option><option>Конференция</option><option>Кино</option><option>Спорт</option><option>Театр</option></select></label>
+<label for="period"><span>Период</span><select id="period"><option value="all">Любая дата</option><option value="week">На этой неделе</option><option value="month">В этом месяце</option></select></label>
+</div>
+<div id="events" class="events" aria-live="polite" aria-label="Список мероприятий"></div>
+</section>
+
+<aside class="card" aria-labelledby="cart-title">
+<h2 id="cart-title">Корзина</h2>
+<div id="cart" class="cart" aria-live="polite" aria-label="Текущая корзина"></div>
+<div class="summary" aria-label="Итог заказа">
+<div class="summaryRow"><span>Билеты</span><b id="cnt">0</b></div>
+<div class="summaryRow"><span>Сервисный сбор 4%</span><b id="fee">0 ₽</b></div>
+<div class="summaryRow total"><span>Итого</span><span id="sum">0 ₽</span></div>
+</div>
+<h3>Оформление заказа</h3>
+<form id="checkout" aria-describedby="checkout-help">
+<p id="checkout-help" class="muted small">Заполните данные покупателя. Если вы зарегистрированы, данные можно подставить из профиля.</p>
+<label for="name"><span>Имя покупателя</span><input id="name" required autocomplete="name" placeholder="Иван Петров"></label>
+<label for="phone"><span>Телефон покупателя</span><input id="phone" required autocomplete="tel" inputmode="tel" placeholder="+7 999 123-45-67"></label>
+<label for="email"><span>Email для билета</span><input id="email" type="email" required autocomplete="email" placeholder="ivan@example.com"></label>
+<label for="pay"><span>Способ оплаты</span><select id="pay"><option>Банковская карта</option><option>СБП</option><option>Баллы лояльности</option></select></label>
+<button id="payBtn">Оплатить и получить билет</button>
+</form>
+</aside>
+</div>
+</section>
+
+<section id="tab-orders" class="hidden" role="tabpanel" aria-labelledby="tab-button-orders">
+  <div class="card">
+    <h2>Мои электронные билеты</h2>
+    <p class="muted small">Заказы сохраняются только в этом браузере. QR-код условный; для озвучки доступен номер заказа.</p>
+    <div id="orders" class="orders" aria-live="polite"></div>
+  </div>
+</section>
+
+<section id="tab-refunds" class="hidden" role="tabpanel" aria-labelledby="tab-button-refunds">
+  <div class="card">
+    <h2>Отмена билета и возврат средств</h2>
+    <p class="muted small">
+      Здесь пользователь выбирает уже купленный билет, отменяет его и создаёт запрос на возврат.
+      В MVP возврат не отправляется в банк, а сохраняется как демонстрационный статус.
+    </p>
+
+    <form id="refundForm" aria-describedby="refund-help">
+      <p id="refund-help" class="muted small">Доступны только активные купленные билеты. Билеты с уже запрошенным возвратом повторно выбрать нельзя.</p>
+
+      <label for="refundSelect">
+        <span>Билет для отмены</span>
+        <select id="refundSelect" required></select>
+      </label>
+
+      <label for="refundReason">
+        <span>Причина возврата</span>
+        <select id="refundReason" required>
+          <option value="Не могу посетить мероприятие">Не могу посетить мероприятие</option>
+          <option value="Купил билет ошибочно">Купил билет ошибочно</option>
+          <option value="Не подходит дата или время">Не подходит дата или время</option>
+          <option value="Другая причина">Другая причина</option>
+        </select>
+      </label>
+
+      <label for="refundComment">
+        <span>Комментарий к возврату</span>
+        <input id="refundComment" placeholder="Например: изменились планы">
+      </label>
+
+      <button id="refundBtn" type="submit">Отменить билет и запросить возврат</button>
+    </form>
+
+    <h3>Статусы билетов и возвратов</h3>
+    <div id="refunds" class="orders" aria-live="polite"></div>
+  </div>
+</section>
+
+<section id="tab-scenarios" class="hidden" role="tabpanel" aria-labelledby="tab-button-scenarios">
+<div class="card">
+<h2>Пользовательские сценарии</h2>
+<div class="scenario"><b>1. Регистрация по номеру телефона</b><p class="muted">Пользователь открывает профиль справа сверху, вводит имя и телефон, получает демонстрационный код 1111 и завершает регистрацию.</p></div>
+<div class="scenario"><b>2. Использование профиля</b><p class="muted">Пользователь открывает профиль и подставляет имя и телефон в форму оформления заказа.</p></div>
+<div class="scenario"><b>3. Поиск мероприятия</b><p class="muted">Пользователь открывает каталог, ищет событие и фильтрует его по категории или дате.</p></div>
+<div class="scenario"><b>4. Выбор билета</b><p class="muted">Пользователь выбирает мероприятие, тип билета и количество.</p></div>
+<div class="scenario"><b>5. Изменение количества билетов</b><p class="muted">Пользователь увеличивает или уменьшает количество билетов прямо в карточке мероприятия или в корзине.</p></div>
+<div class="scenario"><b>6. Удаление билета из корзины</b><p class="muted">Пользователь нажимает кнопку «Удалить билет» у позиции корзины. Система удаляет позицию, пересчитывает итог и озвучивает изменение.</p></div>
+<div class="scenario"><b>7. Оформление заказа</b><p class="muted">Пользователь вводит имя, телефон, email, выбирает способ оплаты и подтверждает покупку.</p></div>
+<div class="scenario"><b>8. Получение электронного билета</b><p class="muted">Система создаёт электронный билет с номером заказа и условным QR-кодом.</p></div>
+<div class="scenario"><b>9. Просмотр купленных билетов</b><p class="muted">Пользователь открывает раздел «Мои билеты» и видит все оформленные заказы.</p></div>
+<div class="scenario"><b>10. Отмена купленного билета</b><p class="muted">Пользователь открывает вкладку «Возвраты», выбирает активный билет, указывает причину и отправляет запрос.</p></div>
+<div class="scenario"><b>11. Запрос возврата средств</b><p class="muted">Система меняет статус билета на «Возврат запрошен», возвращает билет в доступные остатки и озвучивает результат через экранный диктор.</p></div>
+</div>
+</section>
+
+<section id="tab-about" class="hidden" role="tabpanel" aria-labelledby="tab-button-about">
+<div class="card">
+<h2>Описание продукта</h2>
+<p><b>TicketFlow</b> — сервис для онлайн-покупки билетов на мероприятия: концерты, конференции, кино, спорт и театр.</p>
+<h3>Что добавлено в этой версии</h3>
+<p class="muted">
+Добавлены профиль пользователя справа сверху, регистрация по номеру телефона, подстановка данных профиля в заказ,
+явный сценарий удаления билета из корзины, отдельная вкладка отмены купленного билета и запрос возврата средств.
+</p>
+<h3>Ассистивность и доступность</h3>
+<p class="muted">
+Сохранены семантические области страницы, skip-link, подписи полей, озвучиваемые изменения через aria-live,
+понятные названия кнопок, видимый фокус клавиатуры и текстовые альтернативы для условного QR-кода.
+</p>
+<h3>MVP-функции</h3>
+<p class="muted">Каталог, поиск, фильтры, типы билетов, остатки, корзина, удаление билетов до оплаты, регистрация по телефону, имитация оплаты, электронный билет, история заказов, отмена купленного билета и запрос возврата средств.</p>
+</div>
+</section>
+</main>
+
+<footer role="contentinfo">Прототип работает без сервера. Данные сохраняются в браузере через localStorage.</footer>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+const CART='tf_cart_profile_v1', ORDERS='tf_orders_profile_v1', USER='tf_user_profile_v1';
+const DEMO_CODE='1111';
+const events=[
+{id:'E1',title:'Neon Night: электронный концерт',cat:'Концерт',date:'2026-06-19',time:'20:00',place:'Music Hall',desc:'Электронная музыка, световое шоу и afterparty.',tickets:[['standard','Стандарт',2500,42],['vip','VIP',6500,12],['student','Студенческий',1500,20]]},
+{id:'E2',title:'IT Future Conf',cat:'Конференция',date:'2026-06-24',time:'10:00',place:'Tech Campus',desc:'Доклады про DevOps, безопасность, backend и карьеру.',tickets:[['standard','Обычный',3900,80],['vip','Премиум',8900,15],['student','Студенческий',1900,30]]},
+{id:'E3',title:'Открытый кинопоказ: Blade Runner',cat:'Кино',date:'2026-06-21',time:'21:30',place:'Open Air Cinema',desc:'Культовое кино под открытым небом.',tickets:[['standard','Входной',900,100],['vip','Место с пледом',1600,25]]},
+{id:'E4',title:'Финал студенческой лиги',cat:'Спорт',date:'2026-06-28',time:'18:00',place:'University Arena',desc:'Финальная игра сезона и фан-зона.',tickets:[['standard','Трибуна',1200,200],['vip','Первый ряд',3200,18],['student','Студенческий',700,70]]},
+{id:'E5',title:'Спектакль «Город и тени»',cat:'Театр',date:'2026-07-03',time:'19:00',place:'Black Box Theatre',desc:'Камерная постановка о жизни большого города.',tickets:[['standard','Партер',2100,35],['vip','Лучшие места',4200,8],['student','Студенческий',1100,12]]}
+];
+const $=id=>document.getElementById(id);
+const cart=()=>JSON.parse(localStorage.getItem(CART)||'[]');
+const orders=()=>JSON.parse(localStorage.getItem(ORDERS)||'[]');
+const user=()=>JSON.parse(localStorage.getItem(USER)||'null');
+const saveCart=x=>localStorage.setItem(CART,JSON.stringify(x));
+const saveOrders=x=>localStorage.setItem(ORDERS,JSON.stringify(x));
+const saveUser=x=>localStorage.setItem(USER,JSON.stringify(x));
+const clearUser=()=>localStorage.removeItem(USER);
+const ev=id=>events.find(e=>e.id===id);
+const tk=(eid,tid)=>ev(eid).tickets.find(t=>t[0]===tid);
+const money=n=>new Intl.NumberFormat('ru-RU').format(n)+' ₽';
+const date=d=>new Date(d+'T12:00:00').toLocaleDateString('ru-RU',{day:'2-digit',month:'long',year:'numeric'});
+const esc=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+function announce(t){$('live').textContent='';setTimeout(()=>$('live').textContent=t,30)}
+function toast(t){$('toast').textContent=t;$('toast').classList.add('show');announce(t);setTimeout(()=>$('toast').classList.remove('show'),1900)}
+function sold(eid,tid){return orders().reduce((a,o)=>a+o.items.filter(i=>i.eid===eid&&i.tid===tid&&i.refundStatus!=='requested').reduce((s,i)=>s+i.qty,0),0)}
+function left(eid,tid){return Math.max(0,tk(eid,tid)[3]-sold(eid,tid))}
+function qty(eid,tid){return cart().find(i=>i.eid===eid&&i.tid===tid)?.qty||0}
+function add(eid,tid){
+  let c=cart(),e=ev(eid),t=tk(eid,tid),i=c.find(x=>x.eid===eid&&x.tid===tid);
+  if(qty(eid,tid)>=left(eid,tid))return toast('Билеты этого типа закончились');
+  i?i.qty++:c.push({eid,tid,qty:1});
+  saveCart(c);render();toast('Добавлен билет: '+e.title+', тип '+t[1]);
+}
+function dec(eid,tid){
+  let c=cart(),e=ev(eid),t=tk(eid,tid),i=c.find(x=>x.eid===eid&&x.tid===tid);
+  if(!i)return;
+  i.qty--;
+  if(i.qty<=0)c=c.filter(x=>!(x.eid===eid&&x.tid===tid));
+  saveCart(c);render();toast('Количество билетов уменьшено: '+e.title+', тип '+t[1]);
+}
+function rem(eid,tid){
+  let e=ev(eid),t=tk(eid,tid);
+  saveCart(cart().filter(x=>!(x.eid===eid&&x.tid===tid)));
+  render();toast('Удалён билет из корзины: '+e.title+', тип '+t[1]);
+}
+function totals(){
+  let c=cart(),sub=c.reduce((s,i)=>s+tk(i.eid,i.tid)[2]*i.qty,0),cnt=c.reduce((s,i)=>s+i.qty,0),fee=cnt?Math.round(sub*.04):0;
+  return{cnt,fee,total:sub+fee};
+}
+function validPhone(phone){
+  return phone.replace(/\D/g,'').length>=10;
+}
+function renderProfile(){
+  let u=user();
+  $('guestProfile').classList.toggle('hidden',!!u);
+  $('userProfile').classList.toggle('hidden',!u);
+  if(u){
+    $('profileBtnText').textContent=u.name+' · '+u.phone;
+    $('avatar').textContent=u.name.trim()[0]?.toUpperCase()||'П';
+    $('profileName').textContent=u.name;
+    $('profilePhone').textContent=u.phone;
+  }else{
+    $('profileBtnText').textContent='Гость · зарегистрироваться';
+    $('avatar').textContent='Г';
+    $('phoneForm').classList.remove('hidden');
+    $('codeForm').classList.add('hidden');
+  }
+}
+function renderEvents(){
+  let q=$('search').value.toLowerCase().trim(),cat=$('cat').value,p=$('period').value;
+  let week=new Date('2026-06-22T12:00:00'),month=new Date('2026-07-15T12:00:00');
+  let arr=events
+    .filter(e=>(cat==='all'||e.cat===cat)&&(!q||(e.title+' '+e.desc+' '+e.cat).toLowerCase().includes(q)))
+    .filter(e=>{let d=new Date(e.date+'T12:00:00');return p==='week'?d<=week:p==='month'?d<=month:true});
+  $('events').innerHTML=arr.length?arr.map(e=>`
+    <article class="event" aria-labelledby="title-${e.id}">
+      <div class="poster" aria-hidden="true"><div><b>${e.date.slice(8)}</b><br>${date(e.date).split(' ')[1]}</div></div>
+      <div class="body">
+        <div>
+          <h3 class="title" id="title-${e.id}">${esc(e.title)}</h3>
+          <div class="muted small">${date(e.date)} · ${e.time} · ${esc(e.place)}</div>
+        </div>
+        <div class="row" aria-label="Категория мероприятия"><span class="pill purple">${e.cat}</span><span class="pill">онлайн-продажа</span></div>
+        <p class="muted small">${esc(e.desc)}</p>
+        <div aria-label="Типы билетов для мероприятия ${esc(e.title)}">
+          ${e.tickets.map(t=>{
+            let l=left(e.id,t[0]),q=qty(e.id,t[0]),cl=l>20?'green':l>5?'yellow':'red';
+            return `<div class="ticketType">
+              <div>
+                <b>${esc(t[1])} · ${money(t[2])}</b><br>
+                <span class="muted small">Осталось: <span class="pill ${cl}">${l}</span> · В корзине: ${q}</span>
+              </div>
+              <div class="qty" aria-label="Количество билетов ${esc(t[1])} на ${esc(e.title)}">
+                <button class="secondary" onclick="dec('${e.id}','${t[0]}')" ${q===0?'disabled':''} aria-label="Уменьшить количество билетов ${esc(t[1])} на мероприятие ${esc(e.title)}">−</button>
+                <b aria-label="В корзине ${q}">${q}</b>
+                <button onclick="add('${e.id}','${t[0]}')" ${q>=l?'disabled':''} aria-label="Добавить билет ${esc(t[1])} на мероприятие ${esc(e.title)}">+</button>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </article>`).join(''):'<div class="scenario muted" role="status">Мероприятий не найдено.</div>';
+}
+function renderCart(){
+  let c=cart();
+  $('cart').innerHTML=c.length?c.map(i=>{
+    let e=ev(i.eid),t=tk(i.eid,i.tid);
+    return `<div class="cartItem" aria-label="Позиция корзины: ${esc(e.title)}, ${esc(t[1])}, ${i.qty} штук">
+      <div><b>${esc(e.title)}</b><div class="muted small">${date(e.date)} · ${e.time}</div><div class="muted small">${esc(t[1])} · ${i.qty} шт.</div></div>
+      <div><b>${money(t[2]*i.qty)}</b><div class="qty" style="margin-top:8px">
+        <button class="secondary" onclick="dec('${i.eid}','${i.tid}')" aria-label="Уменьшить количество: ${esc(e.title)}, ${esc(t[1])}">−</button>
+        <b aria-label="Количество ${i.qty}">${i.qty}</b>
+        <button onclick="add('${i.eid}','${i.tid}')" aria-label="Увеличить количество: ${esc(e.title)}, ${esc(t[1])}">+</button>
+        <button class="danger" onclick="rem('${i.eid}','${i.tid}')" aria-label="Удалить билет из корзины: ${esc(e.title)}, ${esc(t[1])}">Удалить билет</button>
+      </div></div>
+    </div>`;
+  }).join(''):'<div class="scenario muted" role="status">Корзина пустая. Добавьте билет из каталога.</div>';
+  let t=totals();
+  $('cnt').textContent=t.cnt;$('fee').textContent=money(t.fee);$('sum').textContent=money(t.total);$('payBtn').disabled=t.cnt===0;
+}
+function itemStatusPill(item){
+  return item.refundStatus==='requested'
+    ? '<span class="pill yellow">Возврат запрошен</span>'
+    : '<span class="pill green">Билет активен</span>';
+}
+function renderOrders(){
+  let os=orders();
+  $('orders').innerHTML=os.length?os.map(o=>`
+    <article class="ticket" aria-labelledby="order-${o.id}">
+      <div class="ticketHead">
+        <div>
+          <span class="pill green">Заказ оплачен</span>
+          <h2 id="order-${o.id}" style="margin:8px 0 4px">Заказ ${o.id}</h2>
+          <div class="muted small">${esc(o.name)} · ${esc(o.phone)} · ${esc(o.email)}</div>
+          <div class="muted small">${new Date(o.created).toLocaleString('ru-RU')}</div>
+        </div>
+        <div class="qr" aria-label="Демонстрационный QR-код билета. Номер заказа ${o.id}">${o.id}<br>QR DEMO</div>
+      </div>
+      ${o.items.map((i,idx)=>{let e=ev(i.eid),t=tk(i.eid,i.tid);return `<div class="ticketType">
+        <div>
+          <b>${esc(e.title)}</b><br>
+          <span class="muted small">${date(e.date)} · ${e.time} · ${esc(e.place)}<br>${esc(t[1])} · ${i.qty} шт.</span><br>
+          ${itemStatusPill(i)}
+          ${i.refundStatus==='requested'?`<span class="muted small"><br>Причина возврата: ${esc(i.refundReason||'не указана')}</span>`:''}
+        </div>
+        <b>${money(t[2]*i.qty)}</b>
+      </div>`}).join('')}
+      <div class="summaryRow total"><span>Итого</span><span>${money(o.total)}</span></div>
+    </article>`).join(''):'<div class="scenario muted" role="status">Пока нет купленных билетов.</div>';
+}
+function activeRefundItems(){
+  let result=[];
+  orders().forEach(o=>o.items.forEach((i,idx)=>{
+    if(i.refundStatus!=='requested'){
+      let e=ev(i.eid),t=tk(i.eid,i.tid);
+      result.push({order:o,item:i,idx,event:e,ticket:t});
+    }
+  }));
+  return result;
+}
+function renderRefunds(){
+  let active=activeRefundItems();
+  let select=$('refundSelect');
+  if(select){
+    select.innerHTML=active.length
+      ? active.map(x=>`<option value="${x.order.id}|${x.idx}">${x.order.id}: ${esc(x.event.title)} — ${esc(x.ticket[1])}, ${x.item.qty} шт., ${money(x.ticket[2]*x.item.qty)}</option>`).join('')
+      : '<option value="">Нет активных билетов для возврата</option>';
+    $('refundBtn').disabled=active.length===0;
+  }
+
+  let os=orders();
+  let rows=[];
+  os.forEach(o=>o.items.forEach((i,idx)=>{
+    let e=ev(i.eid),t=tk(i.eid,i.tid);
+    rows.push(`<div class="cartItem">
+      <div>
+        <b>${esc(e.title)}</b>
+        <div class="muted small">Заказ ${o.id} · ${date(e.date)} · ${e.time} · ${esc(t[1])} · ${i.qty} шт.</div>
+        ${itemStatusPill(i)}
+        ${i.refundStatus==='requested'?`<div class="muted small">Запрошен: ${new Date(i.refundRequestedAt).toLocaleString('ru-RU')}<br>Причина: ${esc(i.refundReason||'не указана')}<br>Комментарий: ${esc(i.refundComment||'—')}</div>`:''}
+      </div>
+      <b>${money(t[2]*i.qty)}</b>
+    </div>`);
+  }));
+  $('refunds').innerHTML=rows.length?rows.join(''):'<div class="scenario muted" role="status">Сначала купите билет, затем здесь появится возможность отмены и возврата.</div>';
+}
+function requestRefund(value,reason,comment){
+  if(!value)return toast('Нет выбранного билета для возврата');
+  let [orderId,idxRaw]=value.split('|'),idx=Number(idxRaw);
+  let os=orders(),order=os.find(o=>o.id===orderId);
+  if(!order||!order.items[idx])return toast('Билет не найден');
+  let item=order.items[idx];
+  if(item.refundStatus==='requested')return toast('По этому билету уже запрошен возврат');
+  item.refundStatus='requested';
+  item.refundReason=reason;
+  item.refundComment=comment;
+  item.refundRequestedAt=new Date().toISOString();
+  saveOrders(os);
+  render();
+  toast('Билет отменён. Запрос на возврат средств создан');
+}
+function render(){renderProfile();renderEvents();renderCart();renderOrders();renderRefunds()}
+$('profileBtn').addEventListener('click',()=>{
+  let panel=$('profilePanel'),willOpen=panel.classList.contains('hidden');
+  panel.classList.toggle('hidden',!willOpen);
+  $('profileBtn').setAttribute('aria-expanded',String(willOpen));
+  announce(willOpen?'Профиль открыт':'Профиль закрыт');
+});
+$('phoneForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  let name=$('regName').value.trim(),phone=$('regPhone').value.trim();
+  if(!validPhone(phone))return toast('Введите корректный номер телефона');
+  sessionStorage.setItem('pendingProfile',JSON.stringify({name,phone}));
+  $('phoneForm').classList.add('hidden');
+  $('codeForm').classList.remove('hidden');
+  $('smsCode').focus();
+  toast('Код отправлен. Для демонстрации используйте 1111');
+});
+$('codeForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  if($('smsCode').value.trim()!==DEMO_CODE)return toast('Неверный код. В MVP используется код 1111');
+  let pending=JSON.parse(sessionStorage.getItem('pendingProfile')||'null');
+  if(!pending)return toast('Сначала введите телефон');
+  saveUser(pending);
+  sessionStorage.removeItem('pendingProfile');
+  $('regName').value='';$('regPhone').value='';$('smsCode').value='';
+  renderProfile();
+  toast('Регистрация завершена');
+});
+$('backToPhone').addEventListener('click',()=>{
+  $('codeForm').classList.add('hidden');
+  $('phoneForm').classList.remove('hidden');
+  $('regPhone').focus();
+});
+$('logoutBtn').addEventListener('click',()=>{
+  clearUser();
+  renderProfile();
+  toast('Вы вышли из профиля');
+});
+$('fillBuyer').addEventListener('click',()=>{
+  let u=user();
+  if(!u)return;
+  $('name').value=u.name;
+  $('phone').value=u.phone;
+  $('profilePanel').classList.add('hidden');
+  $('profileBtn').setAttribute('aria-expanded','false');
+  $('email').focus();
+  toast('Данные профиля подставлены в заказ');
+});
+$('refundForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  requestRefund($('refundSelect').value,$('refundReason').value,$('refundComment').value.trim());
+  $('refundComment').value='';
+});
+$('checkout').addEventListener('submit',e=>{
+  e.preventDefault();
+  let c=cart();
+  if(!c.length)return toast('Корзина пустая');
+  if(!validPhone($('phone').value))return toast('Введите корректный телефон покупателя');
+  if(c.some(i=>i.qty>left(i.eid,i.tid)))return toast('Некоторые билеты закончились');
+  let t=totals(),o={id:'ORD-'+Math.random().toString(36).slice(2,8).toUpperCase(),name:$('name').value,phone:$('phone').value,email:$('email').value,pay:$('pay').value,items:c.map(i=>({...i,refundStatus:'active'})),total:t.total,created:new Date().toISOString()};
+  saveOrders([o,...orders()]);saveCart([]);e.target.reset();render();openTab('orders');toast('Оплата прошла успешно. Создан билет заказа '+o.id);
+});
+['search','cat','period'].forEach(id=>$(id).addEventListener('input',()=>{renderEvents();announce('Список мероприятий обновлён')}));
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>openTab(b.dataset.tab)));
+function openTab(tab){
+  document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===tab)));
+  ['app','orders','refunds','scenarios','about'].forEach(id=>$('tab-'+id).classList.toggle('hidden',id!==tab));
+  if(tab==='orders')renderOrders();
+  if(tab==='refunds')renderRefunds();
+  announce('Открыт раздел '+document.querySelector(`[data-tab="${tab}"]`).textContent);
+}
+window.add=add;window.dec=dec;window.rem=rem;render();
+</script>
+</body>
+</html>
