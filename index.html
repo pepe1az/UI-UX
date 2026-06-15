@@ -131,8 +131,6 @@ footer{max-width:1150px;margin:0 auto 40px;padding:0 22px;color:var(--muted);fon
   <button class="tab" data-tab="app" role="tab" aria-selected="true" aria-controls="tab-app" id="tab-button-app">Прототип</button>
   <button class="tab" data-tab="orders" role="tab" aria-selected="false" aria-controls="tab-orders" id="tab-button-orders">Мои билеты</button>
   <button class="tab" data-tab="refunds" role="tab" aria-selected="false" aria-controls="tab-refunds" id="tab-button-refunds">Возвраты</button>
-  <button class="tab" data-tab="scenarios" role="tab" aria-selected="false" aria-controls="tab-scenarios" id="tab-button-scenarios">Сценарии</button>
-  <button class="tab" data-tab="about" role="tab" aria-selected="false" aria-controls="tab-about" id="tab-button-about">Описание</button>
 </nav>
 
 <div id="live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
@@ -217,41 +215,6 @@ footer{max-width:1150px;margin:0 auto 40px;padding:0 22px;color:var(--muted);fon
   </div>
 </section>
 
-<section id="tab-scenarios" class="hidden" role="tabpanel" aria-labelledby="tab-button-scenarios">
-<div class="card">
-<h2>Пользовательские сценарии</h2>
-<div class="scenario"><b>1. Регистрация по номеру телефона</b><p class="muted">Пользователь открывает профиль справа сверху, вводит имя и телефон, получает демонстрационный код 1111 и завершает регистрацию.</p></div>
-<div class="scenario"><b>2. Использование профиля</b><p class="muted">Пользователь открывает профиль и подставляет имя и телефон в форму оформления заказа.</p></div>
-<div class="scenario"><b>3. Поиск мероприятия</b><p class="muted">Пользователь открывает каталог, ищет событие и фильтрует его по категории или дате.</p></div>
-<div class="scenario"><b>4. Выбор билета</b><p class="muted">Пользователь выбирает мероприятие, тип билета и количество.</p></div>
-<div class="scenario"><b>5. Изменение количества билетов</b><p class="muted">Пользователь увеличивает или уменьшает количество билетов прямо в карточке мероприятия или в корзине.</p></div>
-<div class="scenario"><b>6. Удаление билета из корзины</b><p class="muted">Пользователь нажимает кнопку «Удалить билет» у позиции корзины. Система удаляет позицию, пересчитывает итог и озвучивает изменение.</p></div>
-<div class="scenario"><b>7. Оформление заказа</b><p class="muted">Пользователь вводит имя, телефон, email, выбирает способ оплаты и подтверждает покупку.</p></div>
-<div class="scenario"><b>8. Получение электронного билета</b><p class="muted">Система создаёт электронный билет с номером заказа и условным QR-кодом.</p></div>
-<div class="scenario"><b>9. Просмотр купленных билетов</b><p class="muted">Пользователь открывает раздел «Мои билеты» и видит все оформленные заказы.</p></div>
-<div class="scenario"><b>10. Отмена купленного билета</b><p class="muted">Пользователь открывает вкладку «Возвраты», выбирает активный билет, указывает причину и отправляет запрос.</p></div>
-<div class="scenario"><b>11. Запрос возврата средств</b><p class="muted">Система меняет статус билета на «Возврат запрошен», возвращает билет в доступные остатки и озвучивает результат через экранный диктор.</p></div>
-</div>
-</section>
-
-<section id="tab-about" class="hidden" role="tabpanel" aria-labelledby="tab-button-about">
-<div class="card">
-<h2>Описание продукта</h2>
-<p><b>TicketFlow</b> — сервис для онлайн-покупки билетов на мероприятия: концерты, конференции, кино, спорт и театр.</p>
-<h3>Что добавлено в этой версии</h3>
-<p class="muted">
-Добавлены профиль пользователя справа сверху, регистрация по номеру телефона, подстановка данных профиля в заказ,
-явный сценарий удаления билета из корзины, отдельная вкладка отмены купленного билета и запрос возврата средств.
-</p>
-<h3>Ассистивность и доступность</h3>
-<p class="muted">
-Сохранены семантические области страницы, skip-link, подписи полей, озвучиваемые изменения через aria-live,
-понятные названия кнопок, видимый фокус клавиатуры и текстовые альтернативы для условного QR-кода.
-</p>
-<h3>MVP-функции</h3>
-<p class="muted">Каталог, поиск, фильтры, типы билетов, остатки, корзина, удаление билетов до оплаты, регистрация по телефону, имитация оплаты, электронный билет, история заказов, отмена купленного билета и запрос возврата средств.</p>
-</div>
-</section>
 </main>
 
 <footer role="contentinfo">Прототип работает без сервера. Данные сохраняются в браузере через localStorage.</footer>
@@ -525,7 +488,7 @@ $('checkout').addEventListener('submit',e=>{
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>openTab(b.dataset.tab)));
 function openTab(tab){
   document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===tab)));
-  ['app','orders','refunds','scenarios','about'].forEach(id=>$('tab-'+id).classList.toggle('hidden',id!==tab));
+  ['app','orders','refunds'].forEach(id=>$('tab-'+id).classList.toggle('hidden',id!==tab));
   if(tab==='orders')renderOrders();
   if(tab==='refunds')renderRefunds();
   announce('Открыт раздел '+document.querySelector(`[data-tab="${tab}"]`).textContent);
